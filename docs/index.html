@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Better Ref</title>
+  <style>
+    body { margin: 0; background: #030712; color: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .card { max-width: 420px; width: 100%; padding: 2.5rem 2rem; background: #111827; border: 1px solid #1f2937; border-radius: 16px; }
+    h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+    .sub { font-size: 0.875rem; color: #6b7280; margin: 0 0 2rem; }
+    .version { font-size: 0.75rem; font-weight: 600; color: #22c55e; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); padding: 0.2rem 0.6rem; border-radius: 999px; display: inline-block; margin-bottom: 1.5rem; }
+    .section-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #4b5563; margin-bottom: 0.6rem; }
+    .btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.875rem; font-weight: 600; text-decoration: none; margin-bottom: 0.5rem; transition: opacity 0.15s; box-sizing: border-box; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #f97316; color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.05); color: #d1d5db; border: 1px solid #1f2937; }
+    .btn span { font-size: 0.75rem; font-weight: 400; opacity: 0.7; }
+    .divider { border: none; border-top: 1px solid #1f2937; margin: 1.25rem 0; }
+    .note { font-size: 0.75rem; color: #4b5563; margin-top: 1.5rem; line-height: 1.6; }
+    .error { color: #6b7280; font-size: 0.875rem; }
+    .error a { color: #f97316; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Better Ref</h1>
+  <p class="sub">Basketball referee video analysis</p>
+  <div class="version" id="version">Loading…</div>
+
+  <div id="downloads"><p class="error">Loading download links…</p></div>
+
+  <p class="note">FFmpeg is bundled — no extra installs needed.<br>macOS requires Apple Silicon (M1+). Windows requires 64-bit Windows 10+.</p>
+</div>
+
+<script>
+fetch('https://api.github.com/repos/vesselis/better-ref-releases/releases/latest')
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('version').textContent = data.tag_name
+
+    const dmg = data.assets.find(a => a.name.endsWith('.dmg'))
+    const exe = data.assets.find(a => a.name.endsWith('-setup.exe'))
+    const msi = data.assets.find(a => a.name.endsWith('.msi'))
+    const mb  = b => (b / 1024 / 1024).toFixed(1) + ' MB'
+
+    document.getElementById('downloads').innerHTML = `
+      <div class="section-label">macOS — Apple Silicon</div>
+      ${dmg ? `<a class="btn btn-primary" href="${dmg.browser_download_url}">Download .dmg <span>${mb(dmg.size)}</span></a>` : '<p class="error">No macOS build found.</p>'}
+      <hr class="divider">
+      <div class="section-label">Windows</div>
+      ${exe ? `<a class="btn btn-primary" href="${exe.browser_download_url}">Download installer .exe <span>${mb(exe.size)}</span></a>` : ''}
+      ${msi ? `<a class="btn btn-secondary" href="${msi.browser_download_url}">Download .msi package <span>${mb(msi.size)}</span></a>` : ''}
+    `
+  })
+  .catch(() => {
+    document.getElementById('version').textContent = '—'
+    document.getElementById('downloads').innerHTML = '<p class="error">Could not load releases. <a href="https://github.com/vesselis/better-ref-releases/releases">Go to GitHub releases ↗</a></p>'
+  })
+</script>
+</body>
+</html>
